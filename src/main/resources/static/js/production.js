@@ -4,15 +4,10 @@ export async function work_order_listAll() {
                     <thead>
                         <tr>
                             <th>작업지시번호</th>
-                            <th>품목번호</th>
-                            <th>담당자</th>
+                            <th>제품코드</th>
                             <th>시작일</th>
                             <th>완료일</th>
                             <th>목표수량</th>
-                            <th>양품수량</th>
-                            <th>불량수량</th>
-                            <th>요청일시</th>
-                            <th>상태</th>
                             <th>관리</th>
                         </tr>
                     </thead>`;
@@ -35,14 +30,9 @@ export async function work_order_listAll() {
                 tbody += `<tr data-work-order-id="${row.work_order_id}">
                             <td><strong>${row.work_order_id}</strong></td>
                             <td>${row.stock_id ?? '-'}</td>
-                            <td>${row.emp_id ?? '-'}</td>
                             <td>${formatDate(row.start_date)}</td>
                             <td>${formatDate(row.due_date)}</td>
                             <td>${numberFormat(row.target_qty)}</td>
-                            <td class="good-qty">${numberFormat(row.good_qty)}</td>
-                            <td class="defect-qty">${numberFormat(row.defect_qty)}</td>
-                            <td>${formatDateTime(row.request_date)}</td>
-                            <td>${row.order_status ?? '-'}</td>
                             <td class="actions">
                                 <button class="btn-detail"
                                         data-action="detail"
@@ -56,7 +46,7 @@ export async function work_order_listAll() {
                           </tr>`;
             });
         } else {
-            tbody += `<tr><td colspan="11" style="text-align:center;">조회된 작업 지시서가 없습니다.</td></tr>`;
+            tbody += `<tr><td colspan="6" style="text-align:center;">조회된 작업 지시서가 없습니다.</td></tr>`;
         }
 
         tbody += `</tbody></table>`;
@@ -74,7 +64,7 @@ export async function work_order_listAll() {
 
     } catch (error) {
         console.error('작업 지시서 목록 조회 실패:', error);
-        tbody = `<tbody><tr><td colspan="11" style="text-align:center; color:red;">데이터를 불러오는데 실패했습니다.</td></tr></tbody></table>`;
+        tbody = `<tbody><tr><td colspan="6" style="text-align:center; color:red;">데이터를 불러오는데 실패했습니다.</td></tr></tbody></table>`;
     }
 
     return table + tbody;
@@ -95,8 +85,8 @@ export function work_order_search_form() {
             </select>
         </div>
         <div class="form-group">
-            <label for="stock_id">품목번호</label>
-            <input type="text" id="stock_id" name="stock_id" placeholder="품목번호 입력" />
+            <label for="stock_id">제품코드</label>
+            <input type="text" id="stock_id" name="stock_id" placeholder="제품코드 입력" />
         </div>
         <div class="form-group">
             <label for="start_date">시작일</label>
@@ -125,15 +115,10 @@ export async function work_order_list(formData) {
                     <thead>
                         <tr>
                             <th>작업지시번호</th>
-                            <th>품목번호</th>
-                            <th>담당자</th>
+                            <th>제품코드</th>
                             <th>시작일</th>
                             <th>완료일</th>
                             <th>목표수량</th>
-                            <th>양품수량</th>
-                            <th>불량수량</th>
-                            <th>요청일시</th>
-                            <th>상태</th>
                             <th>관리</th>
                         </tr>
                     </thead>`;
@@ -162,14 +147,9 @@ export async function work_order_list(formData) {
                 tbody += `<tr data-work-order-id="${row.work_order_id}">
                             <td><strong>${row.work_order_id}</strong></td>
                             <td>${row.stock_id ?? '-'}</td>
-                            <td>${row.emp_id ?? '-'}</td>
                             <td>${formatDate(row.start_date)}</td>
                             <td>${formatDate(row.due_date)}</td>
                             <td>${numberFormat(row.target_qty)}</td>
-                            <td class="good-qty">${numberFormat(row.good_qty)}</td>
-                            <td class="defect-qty">${numberFormat(row.defect_qty)}</td>
-                            <td>${formatDateTime(row.request_date)}</td>
-                            <td>${row.order_status ?? '-'}</td>
                             <td class="actions">
                                 <button class="btn-detail"
                                         data-action="detail"
@@ -183,7 +163,7 @@ export async function work_order_list(formData) {
                           </tr>`;
             });
         } else {
-            tbody += `<tr><td colspan="11" style="text-align:center;">검색 결과가 없습니다.</td></tr>`;
+            tbody += `<tr><td colspan="6" style="text-align:center;">검색 결과가 없습니다.</td></tr>`;
         }
 
         tbody += `</tbody></table>`;
@@ -200,7 +180,7 @@ export async function work_order_list(formData) {
 
     } catch (error) {
         console.error('작업 지시서 검색 실패:', error);
-        tbody = `<tbody><tr><td colspan="11" style="text-align:center; color:red;">검색에 실패했습니다.</td></tr></tbody></table>`;
+        tbody = `<tbody><tr><td colspan="6" style="text-align:center; color:red;">검색에 실패했습니다.</td></tr></tbody></table>`;
     }
 
     return table + tbody;
@@ -309,9 +289,11 @@ export async function bom_listAll() {
     let table = `<table>
                     <thead>
                         <tr>
-                            <th>상위 품목번호</th>
-                            <th>하위 품목번호</th>
-                            <th>소요량</th>
+                            <th>BOM 코드</th>
+                            <th>목표 재고코드</th>
+                            <th>자재 재고코드</th>
+                            <th>필요량</th>
+                            <th>관리</th>
                         </tr>
                     </thead>`;
 
@@ -329,13 +311,15 @@ export async function bom_listAll() {
         if (data && data.length > 0) {
             $.each(data, function(i, row) {
                 tbody += `<tr>
+                            <td>${row.bom_id ?? '-'}</td>
                             <td>${row.parent_stock_id ?? '-'}</td>
                             <td>${row.child_stock_id ?? '-'}</td>
                             <td><strong>${numberFormat(row.required_qty)}</strong></td>
+                            <td class="actions">-</td>
                           </tr>`;
             });
         } else {
-            tbody += `<tr><td colspan="4" style="text-align:center;">BOM 정보가 없습니다.</td></tr>`;
+            tbody += `<tr><td colspan="5" style="text-align:center;">BOM 정보가 없습니다.</td></tr>`;
         }
 
         tbody += `</tbody></table>`;
@@ -343,7 +327,7 @@ export async function bom_listAll() {
 
     } catch (error) {
         console.error('BOM 조회 실패:', error);
-        tbody = `<tbody><tr><td colspan="4" style="text-align:center; color:red;">BOM 정보를 불러오는데 실패했습니다.</td></tr></tbody></table>`;
+        tbody = `<tbody><tr><td colspan="5" style="text-align:center; color:red;">BOM 정보를 불러오는데 실패했습니다.</td></tr></tbody></table>`;
     }
 
     return table + tbody;
@@ -355,8 +339,8 @@ export function bom_search_form() {
     // main.html의 .search-form 디자인에 맞게 수정
     const search_bar = `
         <div class="form-group">
-            <label for="parent_stock_id">상위 품목번호</label>
-            <input type="text" id="parent_stock_id" name="parent_stock_id" placeholder="상위 품목번호 입력" />
+            <label for="parent_stock_id">목표 재고코드</label>
+            <input type="text" id="parent_stock_id" name="parent_stock_id" placeholder="목표 재고코드 입력" />
         </div>
         <button type="submit" data-action="search" data-file="production" data-fn="bom_list">
             <i class="fas fa-search"></i> 검색
@@ -374,9 +358,11 @@ export async function bom_list(formData) {
     let table = `<table>
                     <thead>
                         <tr>
-                            <th>상위 품목번호</th>
-                            <th>하위 품목번호</th>
-                            <th>소요량</th>
+                            <th>BOM 코드</th>
+                            <th>목표 재고코드</th>
+                            <th>자재 재고코드</th>
+                            <th>필요량</th>
+                            <th>관리</th>
                         </tr>
                     </thead>`;
 
@@ -395,13 +381,15 @@ export async function bom_list(formData) {
         if (data && data.length > 0) {
             $.each(data, function(i, row) {
                 tbody += `<tr>
+                            <td>${row.bom_id ?? '-'}</td>
                             <td>${row.parent_stock_id ?? '-'}</td>
                             <td>${row.child_stock_id ?? '-'}</td>
                             <td><strong>${numberFormat(row.required_qty)}</strong></td>
+                            <td class="actions">-</td>
                           </tr>`;
-        });
+            });
         } else {
-            tbody += `<tr><td colspan="4" style="text-align:center;">검색 결과가 없습니다.</td></tr>`;
+            tbody += `<tr><td colspan="5" style="text-align:center;">검색 결과가 없습니다.</td></tr>`;
         }
 
         tbody += `</tbody></table>`;
@@ -409,7 +397,7 @@ export async function bom_list(formData) {
 
     } catch (error) {
         console.error('BOM 검색 실패:', error);
-        tbody = `<tbody><tr><td colspan="4" style="text-align:center; color:red;">검색에 실패했습니다.</td></tr></tbody></table>`;
+        tbody = `<tbody><tr><td colspan="5" style="text-align:center; color:red;">검색에 실패했습니다.</td></tr></tbody></table>`;
     }
 
     return table + tbody;
